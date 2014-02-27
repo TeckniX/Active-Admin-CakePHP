@@ -16,8 +16,8 @@ class FilterComponent extends Component {
      * fields which will replace the regular syntax in where i.e. field = 'value'
      */
   var $fieldFormatting    = array(
-    "string"=>array("%1\$s LIKE", "%2\$s%%"),
-    "text"=>array("%1\$s LIKE", "%2\$s%%"),
+    "string"=>array("%1\$s LIKE", "%%%2\$s%%"),
+    "text"=>array("%1\$s LIKE", "%%%2\$s%%"),
     "checkbox"=>array("%1\$s =>", "%2\$s%%"),
     "date"=>array("DATE_FORMAT(%1\$s, '%%d-%%m-%%Y')", "%2\$s"),
     "datetime"=>array("DATE_FORMAT(%1\$s, '%%d-%%m-%%Y')", "%2\$s")
@@ -55,6 +55,13 @@ class FilterComponent extends Component {
                 }
                 if(isset($object->{$model})){ //This is object under current object.
                     $columns = $object->{$model}->getColumnTypes();
+                    // Add virtualFields to the columns 
+                    $virtuals = $object->{$model}->getVirtualField();
+                    if(!empty($virtuals)){
+                        foreach($virtuals as $column=>$virtual){
+                            $columns[$column] = gettype($virtual);
+                        }
+                    }
                     foreach($filter as $field=>$value){
                         if(is_array($value)){ //Possible that this node is another model
                             if(in_array($field, array_keys($columns))){ //The field is from the model, but it has special formatting
